@@ -187,4 +187,8 @@ const (
 	CategoryWorldBank  = "world_bank"
 	CategoryPrices     = "prices"
 	CategoryInfo       = "info"
+
+	// tags
+	TagCategory = "category"
+	TagCity     = "city"
 )

@@ -1,6 +1,8 @@
 package cities
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/tinygodsdev/datasdk/pkg/data"
@@ -78,16 +80,16 @@ func NewCity(name string, attributes map[string]data.Attribute, timestamp time.T
 	city := City{
 		Name:                           name,
 		Timestamp:                      timestamp,
-		Temperature:                    getAttributeValue(attributes, AttributeTemperature),
-		Humidity:                       getAttributeValue(attributes, AttributeHumidity),
-		Pressure:                       getAttributeValue(attributes, AttributePressure),
+		Temperature:                    getAttributeAverageValue(attributes, AttributeTemperature),
+		Humidity:                       getAttributeAverageValue(attributes, AttributeHumidity),
+		Pressure:                       getAttributeAverageValue(attributes, AttributePressure),
 		Description:                    getAttributeValue(attributes, AttributeDescription),
-		Co:                             getAttributeValue(attributes, AttributeCo),
-		No2:                            getAttributeValue(attributes, AttributeNo2),
-		O3:                             getAttributeValue(attributes, AttributeO3),
-		Pm10:                           getAttributeValue(attributes, AttributePm10),
-		Pm25:                           getAttributeValue(attributes, AttributePm25),
-		So2:                            getAttributeValue(attributes, AttributeSo2),
+		Co:                             getAttributeAverageValue(attributes, AttributeCo),
+		No2:                            getAttributeAverageValue(attributes, AttributeNo2),
+		O3:                             getAttributeAverageValue(attributes, AttributeO3),
+		Pm10:                           getAttributeAverageValue(attributes, AttributePm10),
+		Pm25:                           getAttributeAverageValue(attributes, AttributePm25),
+		So2:                            getAttributeAverageValue(attributes, AttributeSo2),
 		CPI:                            getAttributeValue(attributes, AttributeCPI),
 		GDPPerCapita:                   getAttributeValue(attributes, AttributeGDPPerCapita),
 		Exports:                        getAttributeValue(attributes, AttributeExports),
@@ -150,4 +152,23 @@ func getAttributeValue(attributes map[string]data.Attribute, label string) strin
 		return attr.Values[0]
 	}
 	return ""
+}
+
+// getAttributeAverageValue calculates the average value of a given attribute.
+// this is used for attributes that have multiple observations per day.
+func getAttributeAverageValue(attributes map[string]data.Attribute, label string) string {
+	attr, exists := attributes[label]
+	if !exists || len(attr.Values) == 0 {
+		return ""
+	}
+
+	var sum, n float64
+	for _, value := range attr.Values {
+		if v, err := strconv.ParseFloat(value, 64); err == nil {
+			sum += v
+			n++
+		}
+	}
+
+	return fmt.Sprintf("%.2f", sum/n)
 }
